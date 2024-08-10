@@ -626,14 +626,14 @@ class GalxeAccount:
                 return answer
 
     @classmethod
-    async def _get_random_discord_msg_url(cls):
+    def _get_random_discord_msg_url(cls):
         id1 = random.randint(1005543323800410604, 1005583329803498664)
         id2 = id1 + random.randint(20902400016, 87949465516)
         id3 = random.randint(1261000076014841918, 1269925976014841918)
         return f'https://discord.com/channels/{id1}/{id2}/{id3}'
 
     @classmethod
-    async def _get_random_drive_url(cls):
+    def _get_random_drive_url(cls):
         alp = string.ascii_letters + string.digits + '-_'
         folder_id = ''.join(random.choice(alp) for _ in range(33))
         return f'https://drive.google.com/drive/folders/{folder_id}?usp=sharing'
