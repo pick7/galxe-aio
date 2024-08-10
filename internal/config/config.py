@@ -20,6 +20,7 @@ FAKE_TWITTER = cfg.get('FAKE_TWITTER')
 FORCE_LINK_EMAIL = cfg.get('FORCE_LINK_EMAIL')
 UPLOAD_RANDOM_PHOTOS = cfg.get('UPLOAD_RANDOM_PHOTOS')
 GALXE_CAMPAIGN_IDS = cfg.get('GALXE_CAMPAIGN_IDS')
+SHUFFLE_CAMPAIGNS = cfg.get('SHUFFLE_CAMPAIGNS')
 REFERRAL_LINKS = [line.strip() for line in open('files/referral_links.txt', 'r', encoding='utf-8').read().splitlines()
                   if line.strip() != '']
 with open('files/surveys.csv', 'r', encoding='utf-8') as file:

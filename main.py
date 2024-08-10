@@ -1,5 +1,6 @@
 import sys
 import csv
+import copy
 import random
 import aiohttp
 import asyncio
@@ -12,7 +13,7 @@ from eth_account import Account as EthAccount
 
 from internal.config import WAIT_BETWEEN_ACCOUNTS, THREADS_NUM, \
     SKIP_FIRST_ACCOUNTS, RANDOM_ORDER, UPDATE_STORAGE_ACCOUNT_INFO, \
-    GALXE_CAMPAIGN_IDS, REFERRAL_LINKS, SURVEYS, SPACES_STATS
+    GALXE_CAMPAIGN_IDS, REFERRAL_LINKS, SURVEYS, SPACES_STATS, SHUFFLE_CAMPAIGNS
 from internal.utils import async_retry, wait_a_bit, log_long_exc, get_query_param
 from internal.galxe import GalxeAccount
 from internal.models import AccountInfo
@@ -83,7 +84,10 @@ async def process_account(account_data: Tuple[int, Tuple[str, str, str, str, str
 
             await wait_a_bit()
 
-            for campaign_id in GALXE_CAMPAIGN_IDS:
+            campaign_ids = copy.deepcopy(GALXE_CAMPAIGN_IDS)
+            if SHUFFLE_CAMPAIGNS:
+                random.shuffle(campaign_ids)
+            for campaign_id in campaign_ids:
                 await galxe_account.complete_campaign(campaign_id)
                 await galxe_account.claim_campaign(campaign_id)
 

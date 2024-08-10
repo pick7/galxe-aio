@@ -44,6 +44,7 @@ class SurveyAnswerPlaceholder(StrEnum):
     RANDOM_DRIVE_URL = '{RANDOM_DRIVE_URL}'
     RANDOM_DISCORD_MSG_URL = '{RANDOM_DISCORD_MSG_URL}'
     RANDOM_TEXT = '{RANDOM_TEXT}'
+    ADDRESS = '{ADDRESS}'
 
 
 class Gamification(StrEnum):

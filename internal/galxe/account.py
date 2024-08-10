@@ -26,7 +26,6 @@ from ..config import FAKE_TWITTER, HIDE_UNSUPPORTED, MAX_TRIES, FORCE_LINK_EMAIL
 from ..utils import wait_a_bit, get_query_param, get_proxy_url, async_retry, log_long_exc, plural_str, get_conn
 
 from .client import Client
-from .fingerprint import fingerprints, captcha_retry
 from .utils import random_string_for_entropy
 from .models import Recurring, Credential, CredSource, ConditionRelation, QuizType, SurveyType, SurveyAnswerPlaceholder, Gamification, GasType
 from .constants import DISCORD_AUTH_URL, GALXE_DISCORD_CLIENT_ID, CHAIN_NAME_MAPPING, VERIFY_TRIES
@@ -173,6 +172,11 @@ class GalxeAccount:
         await wait_a_bit(4)
         await self.refresh_profile()
 
+    @async_retry
+    async def request_email_verify_code(self, email_username):
+        captcha = await self.get_captcha()
+        await self.client.send_verify_code(email_username, captcha)
+
     async def link_email(self, strict=False):
         existed_email = self.profile.get('email', '')
         if existed_email != '':
@@ -191,8 +195,7 @@ class GalxeAccount:
             async with Email.from_account(self.account) as email_client:
                 await email_client.login()
                 email_username = email_client.username()
-                captcha = await self.get_captcha()
-                await self.client.send_verify_code(email_username, captcha)
+                await self.request_email_verify_code(email_username)
                 logger.info(f'{self.idx}) Verify code was sent to {email_username}')
                 email_text = await email_client.wait_for_email(lambda s: s == 'Please confirm your email on Galxe')
                 code = self._extract_code_from_email(email_text)
@@ -617,6 +620,8 @@ class GalxeAccount:
                 return self._get_random_discord_msg_url()
             case SurveyAnswerPlaceholder.RANDOM_TEXT:
                 return ''.join(random.choice(string.ascii_letters) for _ in range(random.randint(5, 30)))
+            case SurveyAnswerPlaceholder.ADDRESS:
+                return self.account.evm_address
             case _:
                 return answer
 
@@ -635,7 +640,7 @@ class GalxeAccount:
 
     async def _get_random_tweet_url(self):
         username = self.twitter.my_username if self.twitter else await self.fake_username()
-        tweet_id = random.randint(1821005685521723567, 182135685521723567)
+        tweet_id = random.randint(1821005685521723567, 1821356855217235670)
         return f'https://x.com/{username}/status/{tweet_id}'
 
     def _get_aiohttp_kwargs(self):
@@ -692,13 +697,13 @@ class GalxeAccount:
                 raise Exception(f'Upload file failed: {e}')
 
 
-    @captcha_retry
+    @async_retry
     async def add_typed_credential(self, campaign_id: str, credential):
         captcha = await self.get_captcha()
         await self.client.add_typed_credential_items(campaign_id, credential['id'], captcha)
         await wait_a_bit(3)
 
-    @captcha_retry
+    @async_retry
     async def _sync_credential(self, campaign_id: str, credential_id: str, cred_type: str):
         sync_options = self._default_sync_options(credential_id)
         match cred_type:
@@ -890,7 +895,7 @@ class GalxeAccount:
                 return ref_code
         return None
 
-    @captcha_retry
+    @async_retry
     async def _get_claim_data(self, campaign):
         chain = campaign['chain']
         if chain == 'APTOS':
