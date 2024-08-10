@@ -50,7 +50,7 @@ class Twitter:
         self.my_username = await self.get_my_profile_info()
         self.my_user_id = await self.get_user_id(self.my_username)
 
-    async def close():
+    async def close(self):
         await self.tls_client.close()
 
     async def request(self, method, url, acceptable_statuses=None, resp_handler=None, with_text=False, **kwargs):
