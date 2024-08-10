@@ -28,7 +28,7 @@ from ..utils import wait_a_bit, get_query_param, get_proxy_url, async_retry, log
 from .client import Client
 from .fingerprint import fingerprints, captcha_retry
 from .utils import random_string_for_entropy
-from .models import Recurring, Credential, CredSource, ConditionRelation, QuizType, SurveyType, Gamification, GasType
+from .models import Recurring, Credential, CredSource, ConditionRelation, QuizType, SurveyType, SurveyAnswerPlaceholder, Gamification, GasType
 from .constants import DISCORD_AUTH_URL, GALXE_DISCORD_CLIENT_ID, CHAIN_NAME_MAPPING, VERIFY_TRIES
 
 colorama.init()
@@ -603,14 +603,19 @@ class GalxeAccount:
         logger.success(f'{self.idx}) "{survey_name}" submitted')
 
     async def replace_survey_answer_if_needed(self, answer):
+        if ' or ' in answer:
+            parts = answer.split(' or ')
+            placeholders = [ph.value for ph in SurveyAnswerPlaceholder]
+            if all(part in placeholders for part in parts):
+                answer = random.choice(parts)
         match answer:
-            case '{RANDOM_TWEET_URL}':
+            case SurveyAnswerPlaceholder.RANDOM_TWEET_URL:
                 return await self._get_random_tweet_url()
-            case '{RANDOM_DRIVE_URL}':
+            case SurveyAnswerPlaceholder.RANDOM_DRIVE_URL:
                 return self._get_random_drive_url()
-            case '{RANDOM_DISCORD_MSG_URL}':
+            case SurveyAnswerPlaceholder.RANDOM_DISCORD_MSG_URL:
                 return self._get_random_discord_msg_url()
-            case '{RANDOM_TEXT}':
+            case SurveyAnswerPlaceholder.RANDOM_TEXT:
                 return ''.join(random.choice(string.ascii_letters) for _ in range(random.randint(5, 30)))
             case _:
                 return answer

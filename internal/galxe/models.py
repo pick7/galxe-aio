@@ -39,6 +39,13 @@ class SurveyType(StrEnum):
     UPLOAD_FILE = 'UPLOAD_FILE'
 
 
+class SurveyAnswerPlaceholder(StrEnum):
+    RANDOM_TWEET_URL = '{RANDOM_TWEET_URL}'
+    RANDOM_DRIVE_URL = '{RANDOM_DRIVE_URL}'
+    RANDOM_DISCORD_MSG_URL = '{RANDOM_DISCORD_MSG_URL}'
+    RANDOM_TEXT = '{RANDOM_TEXT}'
+
+
 class Gamification(StrEnum):
     POINTS = 'Points'
     OAT = 'Oat'
