@@ -63,7 +63,7 @@ class Twitter:
     async def _get_ct0(self):
         try:
             await self.tls_client.get('https://api.x.com/1.1/account/settings.json')
-            return self.tls_client.sess.cookies.get('ct0')
+            return self.tls_client.sess.cookies.get('ct0') or ''
         except Exception as e:
             reason = 'Your account has been locked\n' if 'Your account has been locked' in str(e) else ''
             self.account.twitter_error = True
