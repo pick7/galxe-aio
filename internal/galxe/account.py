@@ -584,14 +584,18 @@ class GalxeAccount:
         answers = [a.strip() for a in answers.split('|')] if answers else []
 
         if UPLOAD_RANDOM_PHOTOS:
-            for idx, q in enumerate(questions):
+            idx, answers_with_photos = 0, []
+            for q in questions:
                 if q['type'] != SurveyType.UPLOAD_FILE:
+                    answers_with_photos.append(answers[idx])
+                    idx += 1
                     continue
                 uploaded_url = await self.upload_file(await self._get_random_photo_content(), {
                     'space-alias': 'survey',
                     'credId': survey_id,
                 })
-                answers.insert(idx, uploaded_url)
+                answers_with_photos.append(uploaded_url)
+            answers = answers_with_photos
 
         if len(answers) != len(questions):
             logger.warning(f'{self.idx}) Expected {len(questions)} answers, but only {len(answers)} provided')
